@@ -32,20 +32,22 @@ public class JAFileMinifier {
 			throw new IllegalArgumentException("Specified File must be a directory!");
 		}
 
-		System.out.println("Scanning '" + directory.getName() + "'");
+		System.out.println(" Scanning '" + directory.getName() + "'");
+		
+		int files = 0;
 
 		for (File file: directory.listFiles()) {
 			if (file.getName().endsWith(".js") && !file.getName().endsWith(".min.js")) {
-				System.out.println(" Reading '" + file.getName() + "'");
+				System.out.println("  Reading '" + file.getName() + "'");
 
 				URL url = new URL("https://javascript-minifier.com/raw");
-				System.out.println("  Type: JS (JavaScript)");
+				System.out.println("   Type: JS (JavaScript)");
 
-				System.out.println("  Converting...");
+				System.out.println("   Converting...");
 				byte[] bytes = Files.readAllBytes(Paths.get(file.getPath()));
 				bytes = ("input=" + URLEncoder.encode(new String(bytes), "UTF-8")).getBytes("UTF-8");
 
-				System.out.println("  Connecting... '" + url.toString() + "'");
+				System.out.println("   Connecting... '" + url.toString() + "'");
 				final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 				connection.setRequestMethod("POST");
@@ -56,40 +58,41 @@ public class JAFileMinifier {
 				connection.setDoOutput(true);
 				connection.setConnectTimeout(7000);
 
-				System.out.println("  Sending data... (" + bytes.length + " Bytes)");
+				System.out.println("   Sending data... (" + bytes.length + " Bytes)");
 				DataOutputStream output = new DataOutputStream(connection.getOutputStream());
 				output.write(bytes);
 
 				final int code = connection.getResponseCode();
 
-				System.out.println("  Response: " + code);
+				System.out.println("   Response: " + code);
 
 				String destination = file.getParent() + "/" + file.getName().replace(".js", ".min.js");
 
 				if (code == 200) {
-					System.out.println("  Exporting '" + destination + "'");
+					System.out.println("   Exporting '" + destination + "'");
 				    ReadableByteChannel rbc = Channels.newChannel(connection.getInputStream());
 					FileOutputStream fos = new FileOutputStream(destination);
 				    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				    fos.close();
 				    connection.disconnect();
 					System.out.println("  Done!");
+					files++;
 				}
 				else {
-				    System.err.println("Could not connect to Webservice.");
+				    System.err.println(" Could not connect to Webservice.");
 				}
 			}
 			else if (file.getName().endsWith(".css") && !file.getName().endsWith(".min.css")) {
-				System.out.println(" Reading '" + file.getName() + "'");
+				System.out.println("  Reading '" + file.getName() + "'");
 
 				URL url = new URL("https://cssminifier.com/raw");
-				System.out.println("  Type: CSS (Cascading Style Sheet)");
+				System.out.println("   Type: CSS (Cascading Style Sheet)");
 
-				System.out.println("  Converting...");
+				System.out.println("   Converting...");
 				byte[] bytes = Files.readAllBytes(Paths.get(file.getPath()));
 				bytes = ("input=" + URLEncoder.encode(new String(bytes), "UTF-8")).getBytes("UTF-8");
 
-				System.out.println("  Connecting... '" + url.toString() + "'");
+				System.out.println("   Connecting... '" + url.toString() + "'");
 				final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 				connection.setRequestMethod("POST");
@@ -100,30 +103,33 @@ public class JAFileMinifier {
 				connection.setDoOutput(true);
 				connection.setConnectTimeout(7000);
 
-				System.out.println("  Sending data... (" + bytes.length + " Bytes)");
+				System.out.println("   Sending data... (" + bytes.length + " Bytes)");
 				DataOutputStream output = new DataOutputStream(connection.getOutputStream());
 				output.write(bytes);
 
 				final int code = connection.getResponseCode();
 
-				System.out.println("  Response: " + code);
+				System.out.println("   Response: " + code);
 
 				String destination = file.getParent() + "/" + file.getName().replace(".css", ".min.css");
 
 				if (code == 200) {
-					System.out.println("  Exporting '" + destination + "'");
+					System.out.println("   Exporting '" + destination + "'");
 				    ReadableByteChannel rbc = Channels.newChannel(connection.getInputStream());
 					FileOutputStream fos = new FileOutputStream(destination);
 				    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				    fos.close();
 				    connection.disconnect();
 					System.out.println("  Done!");
+					files++;
 				}
 				else {
-				    System.err.println("Could not connect to Webservice.");
+				    System.err.println(" Could not connect to Webservice.");
 				}
 			}
 		}
+		
+		System.out.println(" Minified " + files + " file(s)!");
 	}
 
 }
