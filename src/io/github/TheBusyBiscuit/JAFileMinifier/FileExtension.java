@@ -7,7 +7,7 @@ public enum FileExtension {
 	
 	public String type, url, file;
 	
-	private FileExtension(String file, String url, String type) {
+	private FileExtension(String type, String url, String file) {
 		this.file = file;
 		this.url = url;
 		this.type = type;
