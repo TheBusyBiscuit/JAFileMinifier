@@ -37,22 +37,15 @@ public class JAFileMinifier {
 		int files = 0;
 
 		for (File file: directory.listFiles()) {
-			if (file.getName().endsWith(".js") && !file.getName().endsWith(".min.js")) {
-				try {
-					if (handleFileExtension(file, FileExtension.JAVASCRIPT)) {
-						files++;
+			for (FileExtension ext: FileExtension.values()) {
+				if (file.getName().endsWith(ext.file) && !file.getName().endsWith(".min" + ext.file)) {
+					try {
+						if (handleFileExtension(file, ext)) {
+							files++;
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			else if (file.getName().endsWith(".css") && !file.getName().endsWith(".min.css")) {
-				try {
-					if (handleFileExtension(file, FileExtension.CSS)) {
-						files++;
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
 		}
@@ -60,11 +53,11 @@ public class JAFileMinifier {
 		System.out.println(" Minified " + files + " file(s)!");
 	}
 
-	private static boolean handleFileExtension(File file, FileExtension extension) throws IOException {
+	private static boolean handleFileExtension(File file, FileExtension ext) throws IOException {
 		System.out.println("  Reading '" + file.getName() + "'");
 
-		URL url = new URL(extension.url);
-		System.out.println("   Type: " + extension.type);
+		URL url = new URL(ext.url);
+		System.out.println("   Type: " + ext.type);
 
 		System.out.println("   Converting...");
 		byte[] bytes = Files.readAllBytes(Paths.get(file.getPath()));
@@ -89,7 +82,7 @@ public class JAFileMinifier {
 
 		System.out.println("   Response: " + code);
 
-		String destination = file.getParent() + "/" + file.getName().replace(extension.file, ".min" + extension.file);
+		String destination = file.getParent() + "/" + file.getName().replace(ext.file, ".min" + ext.file);
 
 		if (code == 200) {
 			System.out.println("   Exporting '" + destination + "'");
