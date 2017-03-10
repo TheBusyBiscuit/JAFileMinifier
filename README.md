@@ -9,7 +9,7 @@ Just Another File Minifier Software
 ```
 # Usage
 
-1. [Download the full Script](https://github.com/TheBusyBiscuit/JAFileMinifier/blob/master/batch/Download%20%26%20Run.bat)
+1. [Download the full Script](https://github.com/TheBusyBiscuit/JAFileMinifier/raw/master/batch/Download%20%26%20Run.bat)
 2. Put the downloaded script into the root folder of your Project
 3. Now run the downloaded .bat file, it will then download the jar and minify all files in the sub directories
 
@@ -26,7 +26,7 @@ The script will look for all files inside the folders css, javascript and folder
   
 Alternatively, you can download the jar manually.
 
-1. [Download the minimalistic Script](https://github.com/TheBusyBiscuit/JAFileMinifier/blob/master/batch/Download%20%26%20Run.bat)
+1. [Download the minimalistic Script](https://github.com/TheBusyBiscuit/JAFileMinifier/raw/master/batch/Download%20%26%20Run.bat)
 2. Put the downloaded script into the root folder of your Project
 3. [Download the compiled .jar](https://github.com/TheBusyBiscuit/JAFileMinifier/raw/master/dist/JAFileMinifier.jar)
 4. Put the downloaded jar into a sub directory called "JAFileMinifier"
