@@ -36,7 +36,9 @@ Alternatively, you can download the jar manually.
 
 This Software connects to the following web services in order to perform its tasks:
 
+```
 https://javascript-minifier.com/
 http://cssminifier.com/
+```
 
 This Software will connect to GitHub in order to check for updates.
