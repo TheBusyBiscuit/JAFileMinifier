@@ -53,10 +53,12 @@ public class JAFileMinifier {
 			}
 		}
 
-		System.out.println("");
-		System.out.println(" > FINISHED");
-		System.out.println(" > Minified " + files + " file(s)!");
-		System.out.println("");
+		if (files == 1) {
+			System.out.println(" FINISHED (Minified " + files + " file)");
+		}
+		else {
+			System.out.println(" FINISHED (Minified " + files + " files)");
+		}
 	}
 
 	private static boolean handleFileExtension(File file, FileExtension ext) throws IOException {
