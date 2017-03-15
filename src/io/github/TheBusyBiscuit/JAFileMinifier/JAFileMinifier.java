@@ -11,8 +11,11 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 
 public class JAFileMinifier {
+	
+	private static SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
 	public static void main(String[] args) {
 		if (args.length == 0) {
@@ -31,7 +34,7 @@ public class JAFileMinifier {
 		if (!directory.exists() || !directory.isDirectory()) {
 			throw new IllegalArgumentException("Specified File must be a directory!");
 		}
-
+		
 		System.out.println(" Scanning '" + directory.getName() + "'");
 		
 		int files = 0;
@@ -55,6 +58,24 @@ public class JAFileMinifier {
 
 	private static boolean handleFileExtension(File file, FileExtension ext) throws IOException {
 		System.out.println("  Reading '" + file.getName() + "'");
+
+		String destination = file.getParent() + "/" + file.getName().replace(ext.file, ".min" + ext.file);
+		File minified = new File(destination);
+		
+		if (minified.exists()) {
+			System.out.println("    " + file.getName().replace(ext.file, ".min" + ext.file) + " already exists!");
+
+			System.out.println("     Last modified (" + ext.file + "): " + format.format(file.lastModified()));
+			System.out.println("     Last modified (.min" + ext.file + "): " + format.format(minified.lastModified()));
+			
+			if (minified.lastModified() < file.lastModified()) {
+				System.out.println("   '" + file.getName().replace(ext.file, ".min" + ext.file) + "' appears to be outdated!");
+			}
+			else {
+				System.out.println("  '" + file.getName().replace(ext.file, ".min" + ext.file) + "' appears to be up to date!");
+				return false;
+			}
+		}
 
 		URL url = new URL(ext.url);
 		System.out.println("   Type: " + ext.type);
@@ -82,8 +103,6 @@ public class JAFileMinifier {
 
 		System.out.println("   Response: " + code);
 
-		String destination = file.getParent() + "/" + file.getName().replace(ext.file, ".min" + ext.file);
-
 		if (code == 200) {
 			System.out.println("   Exporting '" + destination + "'");
 		    ReadableByteChannel rbc = Channels.newChannel(connection.getInputStream());
@@ -95,7 +114,7 @@ public class JAFileMinifier {
 			return true;
 		}
 		else {
-		    System.err.println(" Could not connect to Webservice.");
+		    System.err.println("  Could not connect to Webservice.");
 		    return false;
 		}
 	}
