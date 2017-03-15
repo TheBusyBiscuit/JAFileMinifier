@@ -46,6 +46,7 @@ public class JAFileMinifier {
 						if (handleFileExtension(file, ext)) {
 							files++;
 						}
+						System.out.println();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -68,16 +69,17 @@ public class JAFileMinifier {
 		File minified = new File(destination);
 		
 		if (minified.exists()) {
-			System.out.println("    " + file.getName().replace(ext.file, ".min" + ext.file) + " already exists!");
+			System.out.println("   " + file.getName().replace(ext.file, ".min" + ext.file) + " already exists!");
 
-			System.out.println("     Last modified (" + ext.file + "): " + format.format(file.lastModified()));
-			System.out.println("     Last modified (.min" + ext.file + "): " + format.format(minified.lastModified()));
+			System.out.println("    Last modified (" + ext.file + "): " + format.format(file.lastModified()));
+			System.out.println("    Last modified (.min" + ext.file + "): " + format.format(minified.lastModified()));
 			
 			if (minified.lastModified() < file.lastModified()) {
-				System.out.println("    " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be outdated!");
+				System.out.println("  " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be outdated!");
 			}
 			else {
-				System.out.println("    " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be up to date!");
+				System.out.println("   " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be up to date!");
+				System.out.println("  Skipping!");
 				return false;
 			}
 		}
