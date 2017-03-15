@@ -46,7 +46,6 @@ public class JAFileMinifier {
 						if (handleFileExtension(file, ext)) {
 							files++;
 						}
-						System.out.println();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
