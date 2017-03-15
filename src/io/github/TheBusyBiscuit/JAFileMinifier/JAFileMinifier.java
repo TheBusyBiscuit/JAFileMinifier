@@ -52,8 +52,11 @@ public class JAFileMinifier {
 				}
 			}
 		}
-		
-		System.out.println(" Minified " + files + " file(s)!");
+
+		System.out.println("");
+		System.out.println(" > FINISHED");
+		System.out.println(" > Minified " + files + " file(s)!");
+		System.out.println("");
 	}
 
 	private static boolean handleFileExtension(File file, FileExtension ext) throws IOException {
@@ -69,10 +72,10 @@ public class JAFileMinifier {
 			System.out.println("     Last modified (.min" + ext.file + "): " + format.format(minified.lastModified()));
 			
 			if (minified.lastModified() < file.lastModified()) {
-				System.out.println("   '" + file.getName().replace(ext.file, ".min" + ext.file) + "' appears to be outdated!");
+				System.out.println("    " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be outdated!");
 			}
 			else {
-				System.out.println("  '" + file.getName().replace(ext.file, ".min" + ext.file) + "' appears to be up to date!");
+				System.out.println("    " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be up to date!");
 				return false;
 			}
 		}
