@@ -42,7 +42,7 @@ public class JAFileMinifier {
 	}
 	
 	private static void run() {
-		int files = run(new File(""));
+		int files = run(new File(System.getProperty("user.dir")));
 		
 		if (files > 0) {
 			if (files == 1)
