@@ -1,14 +1,20 @@
 package io.github.TheBusyBiscuit.JAFileMinifier;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -90,45 +96,104 @@ public class JAFileMinifier {
 				return false;
 			}
 		}
-
-		URL url = new URL(ext.url);
-		System.out.println("   Type: " + ext.type);
 		
-		byte[] bytes = Files.readAllBytes(Paths.get(file.getPath()));
-		bytes = ("input=" + URLEncoder.encode(new String(bytes), "UTF-8")).getBytes("UTF-8");
+		System.out.println("   Type: " + ext.type);
 
-		System.out.println("   Connecting... '" + url.toString() + "'");
-		final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		switch (ext) {
+			case JSON: {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+				String content = "";
+				
+				String line;
+			    while ((line = reader.readLine()) != null) {
+			    	content += line;
+			    }
+			    
+			    reader.close();
+			    
+			    StringBuilder builder = new StringBuilder();
+			    String inner = null;
+			    
+			    for (int i = 0; i < content.length(); i++){
+			        char c = content.charAt(i);        
+			        
+			        if (c == '"') {
+			        	if (inner == null) {
+			        		inner = "\"";
+			        	}
+			        	else if (inner.equals("\"")) {
+			        		inner = null;
+			        	}
+			        }
+			        else if (c == '\'') {
+			        	if (inner == null) {
+			        		inner = "'";
+			        	}
+			        	else if (inner.equals("'")) {
+			        		inner = null;
+			        	}
+			        }
+			        
+			        if (c == ' ') {
+			        	if (inner != null) 
+			        		builder.append(c);
+			        }
+			        else if (c == '\t') {
+			        	if (inner != null) 
+			        		builder.append(c);
+			        }
+			        else {
+			        	builder.append(c);
+			        }
+			    }
 
-		connection.setRequestMethod("POST");
-		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		connection.setRequestProperty("User-Agent", "JAFileMinifier (by TheBusyBiscuit)");
-		connection.setRequestProperty("charset", "utf-8");
-		connection.setRequestProperty("Content-Length", Integer.toString(bytes.length));
-		connection.setDoOutput(true);
-		connection.setConnectTimeout(7000);
-
-		System.out.println("   Sending data... (" + bytes.length + " Bytes)");
-		DataOutputStream output = new DataOutputStream(connection.getOutputStream());
-		output.write(bytes);
-
-		final int code = connection.getResponseCode();
-
-		System.out.println("   Response: " + code);
-
-		if (code == 200) {
-			System.out.println("   Exporting '" + destination + "'");
-		    ReadableByteChannel rbc = Channels.newChannel(connection.getInputStream());
-			FileOutputStream fos = new FileOutputStream(destination);
-		    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-		    fos.close();
-		    connection.disconnect();
-			System.out.println("  Done!");
-			return true;
-		}
-		else {
-		    System.err.println("  Could not connect to Webservice.");
-		    return false;
+				System.out.println("   Exporting '" + destination + "'");
+				
+			    BufferedWriter writer = new BufferedWriter(new FileWriter(destination));
+			    writer.write(builder.toString());
+			    writer.close();
+				System.out.println("  Done!");
+				return true;
+			}
+			default: {
+				URL url = new URL(ext.url);
+				byte[] bytes = Files.readAllBytes(Paths.get(file.getPath()));
+				bytes = ("input=" + URLEncoder.encode(new String(bytes), "UTF-8")).getBytes("UTF-8");
+	
+				System.out.println("   Connecting... '" + url.toString() + "'");
+				final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	
+				connection.setRequestMethod("POST");
+				connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+				connection.setRequestProperty("User-Agent", "JAFileMinifier (by TheBusyBiscuit)");
+				connection.setRequestProperty("charset", "utf-8");
+				connection.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+				connection.setDoOutput(true);
+				connection.setConnectTimeout(7000);
+	
+				System.out.println("   Sending data... (" + bytes.length + " Bytes)");
+				DataOutputStream output = new DataOutputStream(connection.getOutputStream());
+				output.write(bytes);
+	
+				final int code = connection.getResponseCode();
+	
+				System.out.println("   Response: " + code);
+	
+				if (code == 200) {
+					System.out.println("   Exporting '" + destination + "'");
+				    ReadableByteChannel rbc = Channels.newChannel(connection.getInputStream());
+					FileOutputStream fos = new FileOutputStream(destination);
+				    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+				    fos.close();
+				    connection.disconnect();
+					System.out.println("  Done!");
+					return true;
+				}
+				else {
+				    System.err.println("  Could not connect to Webservice.");
+				    return false;
+				}
+			}
 		}
 	}
 

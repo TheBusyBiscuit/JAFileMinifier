@@ -3,7 +3,8 @@ package io.github.TheBusyBiscuit.JAFileMinifier;
 public enum FileExtension {
 	
 	JAVASCRIPT("JS (JavaScript)", "https://javascript-minifier.com/raw", ".js"),
-	CSS("CSS (Cascading Style Sheet)", "https://cssminifier.com/raw", ".css");
+	CSS("CSS (Cascading Style Sheet)", "https://cssminifier.com/raw", ".css"),
+	JSON("JSON (Java Script Object Notation)", "", ".json");
 	
 	public String type, url, file;
 	
