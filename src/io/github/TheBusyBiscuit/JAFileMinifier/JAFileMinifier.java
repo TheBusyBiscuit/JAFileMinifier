@@ -15,12 +15,12 @@ import java.nio.file.Paths;
 public class JAFileMinifier {
 	
 	public static void main(String[] args) throws InterruptedException {
-		if (args.length < 2) {
-			throw new IllegalArgumentException("Usage: <manual/auto> <path>");
+		if (args.length < 1) {
+			throw new IllegalArgumentException("Usage: <manual/auto>");
 		}
 		
 		if (!CompilerMode.isValid(args[0].toUpperCase())) {
-			throw new IllegalArgumentException("Usage: <manual/auto> <path>");
+			throw new IllegalArgumentException("Usage: <manual/auto>");
 		}
 		
 		CompilerMode mode = CompilerMode.valueOf(args[0].toUpperCase());
@@ -28,12 +28,12 @@ public class JAFileMinifier {
 		switch (mode) {
 		case AUTO: {
 			while (true) {
-				run(args);
-				Thread.sleep(2500);
+				run();
+				Thread.sleep(3000);
 			}
 		}
 		case MANUAL:{
-			run(args);
+			run();
 			break;
 		}
 		default:
@@ -41,18 +41,25 @@ public class JAFileMinifier {
 		}
 	}
 	
-	private static void run(String[] args) {
+	private static void run() {
+		int files = run(new File(""));
+		
+		if (files > 0) {
+			if (files == 1)
+				System.out.println(" FINISHED (Minified " + files + " file)");
+			else 
+				System.out.println(" FINISHED (Minified " + files + " files)");
+		}
+	}
+
+	private static int run(File directory) {
 		int files = 0;
 		
-		for (int i = 1; i < args.length; i++) {
-			File directory = new File(args[i]);
-
-			if (!directory.exists() || !directory.isDirectory()) {
-				System.out.println(args[i]);
-				throw new IllegalArgumentException("Specified File must be a directory!");
+		for (File file: directory.listFiles()) {
+			if (file.isDirectory()) {
+				files += run(file);
 			}
-
-			for (File file: directory.listFiles()) {
+			else {
 				for (FileExtension ext: FileExtension.values()) {
 					if (file.getName().endsWith(ext.file) && !file.getName().endsWith(".min" + ext.file)) {
 						try {
@@ -67,12 +74,7 @@ public class JAFileMinifier {
 			}
 		}
 		
-		if (files > 0) {
-			if (files == 1)
-				System.out.println(" FINISHED (Minified " + files + " file)");
-			else 
-				System.out.println(" FINISHED (Minified " + files + " files)");
-		}
+		return files;
 	}
 
 	private static boolean handleFileExtension(File file, FileExtension ext) throws IOException {
