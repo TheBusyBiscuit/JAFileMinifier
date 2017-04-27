@@ -14,11 +14,15 @@ Just Another File Minifier Software
 2. Open up your Command Prompt and navigate to your Project's folder
 
 
-```java -jar JAFileMinifier.jar manual```
+```
+$ java -jar JAFileMinifier.jar manual
+```
 
 Runs the Minifier once for all files in your folder (including sub-folders)
 
-```java -jar JAFileMinifier.jar auto```
+```
+$ java -jar JAFileMinifier.jar auto
+```
 
 Will automatically minify all files in your folder (including sub-folders) when they are being edited in realtime.
 You can stop the program by closing your command prompt or pressing CTRL+C
