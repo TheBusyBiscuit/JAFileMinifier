@@ -11,82 +11,86 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 
 public class JAFileMinifier {
 	
-	private static SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-
-	public static void main(String[] args) {
-		if (args.length == 0) {
-			throw new IllegalArgumentException("No Path specified.");
-		}
-
-		StringBuilder path = new StringBuilder();
-
-		for (int i = 0; i < args.length; i++) {
-			if (i == 0) path.append(args[i]);
-			else path.append(" " + args[i]);
-		}
-
-		File directory = new File(path.toString());
-
-		if (!directory.exists() || !directory.isDirectory()) {
-			throw new IllegalArgumentException("Specified File must be a directory!");
+	public static void main(String[] args) throws InterruptedException {
+		if (args.length < 2) {
+			throw new IllegalArgumentException("Usage: <manual/auto> <path>");
 		}
 		
-		System.out.println(" Scanning '" + directory.getName() + "'");
+		if (!CompilerMode.isValid(args[0].toUpperCase())) {
+			throw new IllegalArgumentException("Usage: <manual/auto> <path>");
+		}
 		
+		CompilerMode mode = CompilerMode.valueOf(args[0].toUpperCase());
+
+		switch (mode) {
+		case AUTO: {
+			while (true) {
+				run(args);
+				Thread.sleep(2500);
+			}
+		}
+		case MANUAL:{
+			run(args);
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	
+	private static void run(String[] args) {
 		int files = 0;
+		
+		for (int i = 1; i < args.length; i++) {
+			File directory = new File(args[i]);
 
-		for (File file: directory.listFiles()) {
-			for (FileExtension ext: FileExtension.values()) {
-				if (file.getName().endsWith(ext.file) && !file.getName().endsWith(".min" + ext.file)) {
-					try {
-						if (handleFileExtension(file, ext)) {
-							files++;
+			if (!directory.exists() || !directory.isDirectory()) {
+				System.out.println(args[i]);
+				throw new IllegalArgumentException("Specified File must be a directory!");
+			}
+
+			for (File file: directory.listFiles()) {
+				for (FileExtension ext: FileExtension.values()) {
+					if (file.getName().endsWith(ext.file) && !file.getName().endsWith(".min" + ext.file)) {
+						try {
+							if (handleFileExtension(file, ext)) {
+								files++;
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
-					} catch (IOException e) {
-						e.printStackTrace();
 					}
 				}
 			}
 		}
-
-		if (files == 1) {
-			System.out.println(" FINISHED (Minified " + files + " file)");
-		}
-		else {
-			System.out.println(" FINISHED (Minified " + files + " files)");
+		
+		if (files > 0) {
+			if (files == 1)
+				System.out.println(" FINISHED (Minified " + files + " file)");
+			else 
+				System.out.println(" FINISHED (Minified " + files + " files)");
 		}
 	}
 
 	private static boolean handleFileExtension(File file, FileExtension ext) throws IOException {
-		System.out.println("  Reading '" + file.getName() + "'");
-
 		String destination = file.getParent() + "/" + file.getName().replace(ext.file, ".min" + ext.file);
 		File minified = new File(destination);
 		
 		if (minified.exists()) {
-			System.out.println("   " + file.getName().replace(ext.file, ".min" + ext.file) + " already exists!");
-
-			System.out.println("    Last modified (" + ext.file + "): " + format.format(file.lastModified()));
-			System.out.println("    Last modified (.min" + ext.file + "): " + format.format(minified.lastModified()));
-			
 			if (minified.lastModified() < file.lastModified()) {
 				System.out.println("  " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be outdated!");
 			}
 			else {
-				System.out.println("   " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be up to date!");
-				System.out.println("  Skipping!");
 				return false;
 			}
 		}
 
 		URL url = new URL(ext.url);
 		System.out.println("   Type: " + ext.type);
-
-		System.out.println("   Converting...");
+		
 		byte[] bytes = Files.readAllBytes(Paths.get(file.getPath()));
 		bytes = ("input=" + URLEncoder.encode(new String(bytes), "UTF-8")).getBytes("UTF-8");
 
