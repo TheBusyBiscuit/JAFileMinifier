@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 public class JAFileMinifier {
 	
 	public static void main(String[] args) throws InterruptedException {
+		System.out.println(">>> JAFileMinifier is watching for changes. Press CTRL+C to stop.");
 		if (args.length < 1) {
 			throw new IllegalArgumentException("Usage: <manual/auto>");
 		}
