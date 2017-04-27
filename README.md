@@ -6,6 +6,7 @@ Just Another File Minifier Software
 ```
 .css
 .js
+.json
 ```
 # Usage
 
