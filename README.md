@@ -10,8 +10,10 @@ Just Another File Minifier Software
 ```
 # Usage
 
+### Via Command Prompt
 ```$ java -jar JAFileMinifier.jar```
 
+### Via ready-to-use Batch Script
 1. [Download the full Script](https://github.com/TheBusyBiscuit/JAFileMinifier/raw/master/batch/Download%20%26%20Run.bat)
 2. Put the downloaded script into the root folder of your Project
 3. Now run the downloaded .bat file, it will then download the jar and minify all files in the sub directories
