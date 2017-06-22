@@ -17,11 +17,14 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JAFileMinifier {
 	
-	public static void main(String[] args) throws InterruptedException {
-		System.out.println(">>> JAFileMinifier is watching for changes. Press CTRL+C to stop.");
+	private static List<String> blacklist = new ArrayList<String>();
+	
+	public static void main(String[] args) throws InterruptedException, IOException {
 		if (args.length < 1) {
 			throw new IllegalArgumentException("Usage: <manual/auto>");
 		}
@@ -30,10 +33,24 @@ public class JAFileMinifier {
 			throw new IllegalArgumentException("Usage: <manual/auto>");
 		}
 		
+		File blacklistFile = new File(System.getProperty("user.dir") + "/JAFileMinifier.blacklist");
+		
+		if (blacklistFile.exists()) {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(blacklistFile), StandardCharsets.UTF_8));
+			
+			String line;
+		    while ((line = reader.readLine()) != null) {
+		    	if (!line.matches("[ \t\n\r]+")) blacklist.add(line);
+		    }
+		    
+		    reader.close();
+		}
+		
 		CompilerMode mode = CompilerMode.valueOf(args[0].toUpperCase());
 
 		switch (mode) {
 		case AUTO: {
+			System.out.println(">>> JAFileMinifier is watching for changes. Press CTRL+C to stop.");
 			while (true) {
 				run();
 				Thread.sleep(3000);
@@ -49,7 +66,9 @@ public class JAFileMinifier {
 	}
 	
 	private static void run() {
-		int files = run(new File(System.getProperty("user.dir")));
+		File file = new File(System.getProperty("user.dir"));
+		
+		int files = run(file);
 		
 		if (files > 0) {
 			if (files == 1)
@@ -64,7 +83,10 @@ public class JAFileMinifier {
 		
 		for (File file: directory.listFiles()) {
 			if (file.isDirectory()) {
-				files += run(file);
+				String path = file.getPath().replace(System.getProperty("user.dir") + "\\", "");
+				if (!isBlacklisted(path)) {
+					files += run(file);
+				}
 			}
 			else {
 				for (FileExtension ext: FileExtension.values()) {
@@ -86,15 +108,22 @@ public class JAFileMinifier {
 
 	private static boolean handleFileExtension(File file, FileExtension ext) throws IOException {
 		String destination = file.getParent() + "/" + file.getName().replace(ext.file, ".min" + ext.file);
+		String path = file.getPath().replace(System.getProperty("user.dir") + "\\", "");
+		
+		if (isBlacklisted(path)) return false;
+		
 		File minified = new File(destination);
 		
 		if (minified.exists()) {
 			if (minified.lastModified() < file.lastModified()) {
-				System.out.println("  " + file.getName().replace(ext.file, ".min" + ext.file) + " appears to be outdated!");
+				System.out.println("  " + path.replace(ext.file, ".min" + ext.file) + " appears to be outdated!");
 			}
 			else {
 				return false;
 			}
+		}
+		else {
+			System.out.println("  " + path);
 		}
 		
 		System.out.println("   Type: " + ext.type);
@@ -180,7 +209,7 @@ public class JAFileMinifier {
 				System.out.println("   Response: " + code);
 	
 				if (code == 200) {
-					System.out.println("   Exporting '" + destination + "'");
+					System.out.println("   Exporting '" + path + "'");
 				    ReadableByteChannel rbc = Channels.newChannel(connection.getInputStream());
 					FileOutputStream fos = new FileOutputStream(destination);
 				    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
@@ -195,6 +224,13 @@ public class JAFileMinifier {
 				}
 			}
 		}
+	}
+
+	public static boolean isBlacklisted(String path) {
+		for (String regex: blacklist) {
+			if (path.matches(regex)) return true;
+		}
+		return false;
 	}
 
 }
